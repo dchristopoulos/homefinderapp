@@ -8,6 +8,11 @@
     gap: 1.25rem;
   }
 
+  .admin-page [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
   .admin-hero {
     border: 1px solid var(--line);
     border-radius: 1.2rem;
@@ -169,6 +174,35 @@
     color: #1e40af;
   }
 
+  .verification-badge {
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    border-radius: 999px;
+    padding: 0.28rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .verification-badge.is-verified {
+    background: color-mix(in srgb, #16a34a 14%, var(--surface));
+    border: 1px solid color-mix(in srgb, #16a34a 44%, var(--line));
+    color: color-mix(in srgb, #16a34a 72%, var(--text-primary));
+  }
+
+  .verification-badge.is-unverified {
+    background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--danger) 44%, var(--line));
+    color: var(--danger);
+  }
+
+  .identity-stack {
+    display: grid;
+    gap: 0.25rem;
+  }
+
   .table-wrap {
     overflow-x: auto;
   }
@@ -278,12 +312,41 @@
   .listing-form input,
   .listing-form select,
   .listing-form textarea {
+    appearance: none;
     width: 100%;
     border: 1px solid var(--line);
-    background: #fff;
+    background-color: var(--surface-elevated) !important;
+    color: var(--text-primary);
+    -webkit-text-fill-color: var(--text-primary);
+    color-scheme: inherit;
     border-radius: 0.45rem;
     padding: 0.45rem 0.5rem;
     font-size: 0.86rem;
+  }
+
+  .listing-form select {
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+      linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 1rem) 50%,
+      calc(100% - 0.7rem) 50%;
+    background-repeat: no-repeat;
+    background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
+    padding-right: 1.9rem;
+  }
+
+  .listing-form input::placeholder,
+  .listing-form textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .listing-form input:focus,
+  .listing-form select:focus,
+  .listing-form textarea:focus {
+    border-color: color-mix(in srgb, var(--brand) 58%, var(--line));
+    box-shadow: var(--ring);
+    outline: none;
   }
 
   .listing-actions {
@@ -419,6 +482,7 @@
           <tr>
             <th>User / Identity</th>
             <th>Role</th>
+            <th>Verification</th>
             <th>Stats</th>
             <th>Actions</th>
           </tr>
@@ -427,10 +491,19 @@
           {% for item in user_stats %}
           <tr>
             <td>
-              <strong style="display: block;">{{ item.username }}</strong>
-              <span class="subtle" style="font-size: 0.8rem;">{{ item.email }}</span>
+              <span class="identity-stack">
+                <strong>{{ item.username }}</strong>
+                <span class="subtle" style="font-size: 0.8rem;">{{ item.email }}</span>
+              </span>
             </td>
             <td><span class="meta-pill" style="font-size: 0.72rem;">{{ item.role }}</span></td>
+            <td>
+              {% if item.email_verified %}
+              <span class="verification-badge is-verified">Verified</span>
+              {% else %}
+              <span class="verification-badge is-unverified">Not verified</span>
+              {% endif %}
+            </td>
             <td style="font-size: 0.84rem;">
               <strong>{{ item.listing_count }}</strong> listings,
               <strong>{{ item.inquiries_count }}</strong> inquiries
@@ -520,6 +593,12 @@
             </label>
             <label>Size (m2)
               <input type="number" name="size" value="{{ listing.size }}" required />
+            </label>
+            <label>Bedrooms
+              <input type="number" name="bedrooms" value="{{ listing.bedrooms }}" min="0" required />
+            </label>
+            <label>Bathrooms
+              <input type="number" name="bathrooms" value="{{ listing.bathrooms }}" min="1" required />
             </label>
             <label>Property Type
               <input type="text" name="property_type" value="{{ listing.property_type }}" required />

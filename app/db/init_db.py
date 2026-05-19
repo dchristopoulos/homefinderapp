@@ -30,8 +30,9 @@ def _seed_default_admin() -> None:
         if existing is not None:
             existing.role = "admin"
             existing.email_verified = True
-            existing.must_reset_password = True
-            if "@" not in str(existing.email) or str(existing.email).endswith(".local"):
+            if not str(existing.email).endswith(".local"):
+                existing.must_reset_password = True
+            if "@" not in str(existing.email):
                 existing.email = "admin@homefinder.com"
             db.add(existing)
             db.commit()

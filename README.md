@@ -52,15 +52,17 @@ Current demo users in the local database:
 
 | Username | Email | Role | Verified |
 | --- | --- | --- | --- |
-| admin | admin@homefinder.com | admin | yes |
-| MasterAdmin | master_admin@homefinder.local | admin | yes |
-| LuxuryRep | luxury_rep@estatemax.com | property_owner | yes |
-| JohnRenter | john_renter@gmail.com | regular_user | yes |
-| seeduser | seed@example.com | admin | no |
-| tcilipass | TCILIP@gmail.com | regular_user | no |
-| tcilipp | tcilipp@gmail.com | regular_user | no |
+| admin | admin@homefinder.local | admin | yes |
+| testpropowner | testpropowner@homefinder.local | property_owner | yes |
+| testuser | testuser@homefinder.local | regular_user | yes |
 
-Only the default seeded admin password is guaranteed by the project setup. Other local demo users may have passwords created during testing.
+Known demo login:
+
+| Identifier | Password | Role |
+| --- | --- | --- |
+| admin | admin | admin |
+| testpropowner@homefinder.local | PropOwner123 | property_owner |
+| testuser@homefinder.local | TestUser123 | regular_user |
 
 ## Tech Stack
 

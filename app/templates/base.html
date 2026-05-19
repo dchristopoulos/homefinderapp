@@ -155,6 +155,7 @@
   </head>
   <body class="is-ready">
     {% set current_path = request.url.path %}
+    {% set nav_role = user.role if user is defined and user else request.session.get("user_role") %}
     <div id="nprogress"><div class="bar" role="progressbar" aria-label="Page loading progress"></div></div>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="page-shell">
@@ -184,7 +185,7 @@
               <li><a href="/dashboard" {% if current_path.startswith('/dashboard') %}aria-current="page"{% endif %}>Dashboard</a></li>
               <li><a href="/messages/my" {% if current_path.startswith('/messages') %}aria-current="page"{% endif %}>Messages</a></li>
               <li><a href="/account" {% if current_path.startswith('/account') or current_path.startswith('/change-password') %}aria-current="page"{% endif %}>Account</a></li>
-              {% if request.session.get("user_role") == "admin" %}
+              {% if nav_role == "admin" %}
               <li><a href="/admin" {% if current_path.startswith('/admin') %}aria-current="page"{% endif %}>Admin</a></li>
               {% endif %}
               <li><a href="/listings/new" class="cta-link">Add Listing</a></li>
@@ -240,11 +241,11 @@
               {% if request.session.get("user_id") %}
               <li><a href="/dashboard">Dashboard</a></li>
               <li><a href="/messages/my">My Messages</a></li>
-              {% if request.session.get("user_role") in ["property_owner", "admin"] %}
+              {% if nav_role in ["property_owner", "admin"] %}
               <li><a href="/messages/inbox">Owner Inbox</a></li>
               {% endif %}
               <li><a href="/account">Account Settings</a></li>
-              {% if request.session.get("user_role") == "admin" %}
+              {% if nav_role == "admin" %}
               <li><a href="/admin">Admin Panel</a></li>
               {% endif %}
               {% else %}
