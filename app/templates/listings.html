@@ -1,0 +1,782 @@
+{% extends "base.html" %}
+{% block title %}Listings - HomeFinder{% endblock %}
+{% block meta_description %}Search and filter HomeFinder listings by location, price, bedrooms, bathrooms, and property type.{% endblock %}
+{% block content %}
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .listings-shell {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .filters-panel {
+    position: sticky;
+    top: 6rem;
+    max-height: calc(100vh - 7rem);
+    overflow: auto;
+    padding: 1.25rem;
+  }
+
+  .filters-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .filters-head h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .filter-group {
+    margin-bottom: 0.95rem;
+  }
+
+  .filter-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    min-height: 42px;
+    padding: 0.55rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.92rem;
+  }
+
+  .field-help {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
+
+  .filter-section {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .filter-section > legend {
+    margin-bottom: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .advanced-filters-panel {
+    display: none;
+    border-top: 1px solid var(--line);
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+
+  .filter-actions {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: 0.7rem;
+  }
+
+  .filter-actions .btn {
+    width: 100%;
+  }
+
+  .results-wrap {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .results-toolbar {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem 1.15rem;
+  }
+
+  .results-toolbar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .results-toolbar h1 {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+    line-height: 1.2;
+  }
+
+  .results-toolbar-subtle {
+    margin: 0.35rem 0 0 0;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .compare-tools {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .compare-help {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+    gap: 1rem;
+  }
+
+  .listing-card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .listing-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 0, 0, 0.14);
+    box-shadow: var(--shadow-md);
+  }
+
+  .listing-media {
+    position: relative;
+    background: #e2e8f0;
+    aspect-ratio: 16 / 10;
+  }
+
+  .listing-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .listing-price {
+    position: absolute;
+    left: 0.8rem;
+    bottom: 0.8rem;
+    background: rgba(16, 24, 40, 0.86);
+    color: #fff;
+    padding: 0.35rem 0.6rem;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+
+  .compare-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.45rem;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--line-strong) 82%, transparent);
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
+    padding: 0.45rem 0.7rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
+
+  .compare-toggle:hover {
+    background: color-mix(in srgb, var(--brand) 8%, var(--surface));
+    border-color: color-mix(in srgb, var(--brand) 42%, var(--line-strong));
+  }
+
+  .compare-toggle input {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 5px;
+    border: 1px solid rgba(15, 23, 42, 0.34);
+    background: #ffffff;
+    margin: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .compare-toggle:has(input:checked) {
+    color: #ffffff;
+    background: linear-gradient(135deg, #2b72f6, #1450c7);
+    border-color: color-mix(in srgb, var(--brand) 70%, black 8%);
+  }
+
+  .compare-toggle input:checked {
+    background: #ffffff;
+    border-color: rgba(255, 255, 255, 0.86);
+  }
+
+  .compare-toggle input:checked::after {
+    content: "";
+    width: 8px;
+    height: 5px;
+    border-left: 2px solid #1450c7;
+    border-bottom: 2px solid #1450c7;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+
+  .listing-body {
+    padding: 1rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .listing-title {
+    margin: 0;
+    font-size: 1.04rem;
+    line-height: 1.35;
+  }
+
+  .listing-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .listing-title a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+
+  .listing-location {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.86rem;
+  }
+
+  .listing-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .listing-meta-item {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.45rem;
+    text-align: center;
+  }
+
+  .listing-meta-value {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .listing-meta-label {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+
+  .listing-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .listing-actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    border-top: 1px solid var(--line);
+    padding-top: 0.75rem;
+  }
+
+  .listing-main-action {
+    width: 100%;
+    min-height: 2.45rem;
+    border-radius: 12px;
+  }
+
+  .listing-save-action {
+    min-width: 5.5rem;
+    min-height: 2.45rem;
+    border-radius: 12px;
+  }
+
+  .listing-contact {
+    margin-top: 0.45rem;
+  }
+
+  .listing-contact .btn {
+    width: 100%;
+    border-radius: 12px;
+    min-height: 2.35rem;
+  }
+
+  .listing-compare-action {
+    margin-top: 0.45rem;
+  }
+
+  .listing-compare-action .compare-toggle {
+    width: 100%;
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1.25rem;
+    display: grid;
+    gap: 0.75rem;
+    justify-items: center;
+  }
+
+  .pagination-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+  }
+
+  .pagination-panel {
+    width: fit-content;
+    margin-inline: auto;
+    padding: 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .page-status {
+    display: grid;
+    gap: 0.05rem;
+    min-width: 8.5rem;
+    text-align: center;
+  }
+
+  .page-status strong {
+    font-size: 0.92rem;
+  }
+
+  .page-status span {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 980px) {
+    .listings-shell {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .filters-panel {
+      position: static;
+      max-height: none;
+    }
+  }
+</style>
+
+<div class="listings-shell">
+  <aside class="panel filters-panel" data-reveal>
+    <div class="filters-head">
+      <h2>Filter Listings</h2>
+      <button type="button" id="toggle-advanced" class="ghost-btn" style="font-size: 0.72rem; padding: 0.35rem 0.55rem;">Advanced</button>
+    </div>
+
+    <form method="get" action="/listings" aria-label="Listing filters">
+      <fieldset class="filter-section">
+        <legend>Basics</legend>
+      <div class="filter-group">
+        <label for="q-filter">Search</label>
+        <input id="q-filter" name="q" type="text" value="{{ query }}" placeholder="Keywords, title, neighborhood" aria-describedby="q-filter-help" />
+        <p id="q-filter-help" class="field-help">Use keywords from title, description, or neighborhood.</p>
+      </div>
+
+      <div class="filter-group">
+        <label for="location-filter">Location</label>
+        <input id="location-filter" name="location" type="text" value="{{ location }}" placeholder="City or area" />
+      </div>
+
+      <div class="filter-group">
+        <label for="max-price-filter">Max Price</label>
+        <input id="max-price-filter" name="max_price" type="number" value="{{ max_price if max_price is not none else '' }}" placeholder="No limit" inputmode="numeric" />
+      </div>
+      </fieldset>
+
+      <div id="advanced-filters" class="advanced-filters-panel">
+        <fieldset class="filter-section">
+          <legend>Advanced</legend>
+        <div class="filter-group">
+          <label for="min-price-filter">Min Price</label>
+          <input id="min-price-filter" name="min_price" type="number" value="{{ min_price if min_price is not none else '' }}" placeholder="Minimum" inputmode="numeric" />
+        </div>
+
+        <div class="filter-group">
+          <label for="property-type-filter">Property Type</label>
+          <select id="property-type-filter" name="property_type">
+            <option value="">Any type</option>
+            {% for t in ['apartment', 'house', 'studio', 'villa', 'duplex', 'loft'] %}
+            <option value="{{ t }}" {{ 'selected' if property_type == t else '' }}>{{ t|title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="furnished-filter">Furnishing</label>
+          <select id="furnished-filter" name="furnished">
+            <option value="">Any furnishing</option>
+            <option value="furnished" {{ 'selected' if furnished == 'furnished' else '' }}>Furnished</option>
+            <option value="semi_furnished" {{ 'selected' if furnished == 'semi_furnished' else '' }}>Semi-furnished</option>
+            <option value="unfurnished" {{ 'selected' if furnished == 'unfurnished' else '' }}>Unfurnished</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="min-bedrooms-filter">Bedrooms (Min)</label>
+          <select id="min-bedrooms-filter" name="min_bedrooms">
+            <option value="">Any</option>
+            {% for i in range(1, 6) %}<option value="{{ i }}" {{ 'selected' if min_bedrooms == i else '' }}>{{ i }}+</option>{% endfor %}
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="min-bathrooms-filter">Bathrooms (Min)</label>
+          <select id="min-bathrooms-filter" name="min_bathrooms">
+            <option value="">Any</option>
+            {% for i in range(1, 6) %}<option value="{{ i }}" {{ 'selected' if min_bathrooms == i else '' }}>{{ i }}+</option>{% endfor %}
+          </select>
+        </div>
+        </fieldset>
+      </div>
+
+      <div class="filter-actions">
+        <button type="submit" class="btn btn-primary">Apply Filters</button>
+        <a href="/listings" class="btn btn-outline">Reset</a>
+      </div>
+    </form>
+  </aside>
+
+  <main class="results-wrap">
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form id="compare-form" method="post" action="/listings/compare" style="display: none;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <input type="hidden" name="next_path" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}" />
+      <span id="compare-hidden-fields"></span>
+    </form>
+
+    <section class="panel results-toolbar" data-reveal>
+      <div class="results-toolbar-top">
+        <div>
+          <h1>Listings</h1>
+          <p class="results-toolbar-subtle">Browse available homes and open any listing for full details.</p>
+        </div>
+        <div class="toolbar-actions">
+          <div class="compare-tools" aria-label="Listing comparison tools">
+            <button id="compare-submit" type="submit" form="compare-form" class="btn btn-outline" disabled>Compare Selected (<span id="compare-count">0</span>)</button>
+            <a id="decision-lab-link" href="/listings/decision-lab" class="btn btn-outline" aria-disabled="true">Analyze Selection</a>
+          </div>
+          <span class="meta-pill">{{ total }} properties</span>
+          <span class="toolbar-chip">Page {{ page }} of {{ total_pages }}</span>
+        </div>
+      </div>
+      <p class="compare-help">Select at least 2 listings to enable comparison.</p>
+
+      <div class="active-filters">
+        {% if preselected_compare_ids %}
+        <span class="toolbar-chip">Selected for compare: {{ preselected_compare_ids|length }}</span>
+        {% endif %}
+        {% if query %}<span class="toolbar-chip">Search: {{ query }}</span>{% endif %}
+        {% if location %}<span class="toolbar-chip">Location: {{ location }}</span>{% endif %}
+        {% if min_price %}<span class="toolbar-chip">Min: ${{ "{:,}".format(min_price) }}</span>{% endif %}
+        {% if max_price %}<span class="toolbar-chip">Max: ${{ "{:,}".format(max_price) }}</span>{% endif %}
+        {% if min_bedrooms %}<span class="toolbar-chip">Beds: {{ min_bedrooms }}+</span>{% endif %}
+        {% if min_bathrooms %}<span class="toolbar-chip">Baths: {{ min_bathrooms }}+</span>{% endif %}
+        {% if property_type %}<span class="toolbar-chip">Type: {{ property_type|replace('_', ' ')|title }}</span>{% endif %}
+        {% if furnished %}<span class="toolbar-chip">Furnishing: {{ furnished|replace('_', ' ')|title }}</span>{% endif %}
+        {% if not query and not location and not min_price and not max_price and not min_bedrooms and not min_bathrooms and not property_type and not furnished %}
+        <span class="toolbar-chip">No active filters</span>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="listings-grid" data-stagger>
+      {% for listing in listings %}
+      <article class="panel listing-card" data-reveal>
+        <div class="listing-media">
+          {% if listing.image_url %}
+          <img src="{{ listing_image_url(listing.image_url) }}" alt="{{ listing.title }}" loading="lazy" onerror="this.onerror=null;this.src='/static/listing-placeholder.svg';" />
+          {% else %}
+          <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <svg width="44" height="44" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+          </div>
+          {% endif %}
+          <span class="listing-price">${{ "{:,}".format(listing.price) }}</span>
+        </div>
+
+        <div class="listing-body">
+          <div>
+            <h3 class="listing-title"><a href="/listings/{{ listing.id }}">{{ listing.title }}</a></h3>
+            <div class="listing-location">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path></svg>
+              <span>{{ listing.location }}</span>
+            </div>
+          </div>
+
+          <div class="listing-meta">
+            <div class="listing-meta-item">
+              <span class="listing-meta-value">{{ listing.bedrooms }}</span>
+              <span class="listing-meta-label">Bedrooms</span>
+            </div>
+            <div class="listing-meta-item">
+              <span class="listing-meta-value">{{ listing.bathrooms }}</span>
+              <span class="listing-meta-label">Bathrooms</span>
+            </div>
+            <div class="listing-meta-item">
+              <span class="listing-meta-value">{{ listing.size }}</span>
+              <span class="listing-meta-label">m²</span>
+            </div>
+          </div>
+
+          <div class="listing-tags">
+            <span class="toolbar-chip">{{ listing.property_type|replace('_', ' ')|title if listing.property_type else 'Property' }}</span>
+            <span class="toolbar-chip">{{ listing.furnished|replace('_', ' ')|title if listing.furnished else 'Furnishing N/A' }}</span>
+          </div>
+
+          <div class="listing-actions">
+            <a href="/listings/{{ listing.id }}" class="btn btn-primary listing-main-action">View Details</a>
+            {% if can_save_listings %}
+            {% set is_saved = listing.id in saved_listing_ids %}
+            <form method="post" action="/listings/{{ listing.id }}/{{ 'unsave' if is_saved else 'save' }}" style="margin: 0;" data-save-toggle="true" data-listing-id="{{ listing.id }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <input type="hidden" name="next_path" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}" />
+              <button type="submit" class="btn {{ 'btn-primary' if is_saved else 'btn-outline' }} listing-save-action" aria-label="{{ 'Unsave listing' if is_saved else 'Save listing' }}" data-saved-label="Saved" data-unsaved-label="Save">
+                {{ 'Saved' if is_saved else 'Save' }}
+              </button>
+            </form>
+            {% else %}
+            <a href="/login" class="btn btn-outline listing-save-action">Save</a>
+            {% endif %}
+          </div>
+          <div class="listing-contact">
+            <a href="/listings/{{ listing.id }}#contact-owner" class="btn btn-outline btn-sm">Contact Owner</a>
+          </div>
+          <div class="listing-compare-action">
+            <label class="compare-toggle">
+              <input
+                type="checkbox"
+                value="{{ listing.id }}"
+                data-compare-checkbox="1"
+                aria-label="Select {{ listing.title }} for comparison"
+                {% if listing.id in preselected_compare_ids %}checked{% endif %}
+              />
+              Compare
+            </label>
+          </div>
+        </div>
+      </article>
+      {% else %}
+      <div class="panel empty-state">
+        <svg width="60" height="60" fill="none" stroke="var(--text-muted)" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 0.8rem;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <h2 style="margin: 0 0 0.35rem 0;">No matching properties</h2>
+        <p class="subtle" style="margin: 0;">Try broadening your filters or changing location and price ranges.</p>
+        <a href="/listings" class="btn btn-outline">Clear all filters</a>
+      </div>
+      {% endfor %}
+    </section>
+
+    {% if total_pages > 1 %}
+    <nav class="pagination-wrap pagination-panel" data-reveal aria-label="Listings pagination">
+      {% if page > 1 %}
+      <a class="btn btn-outline" data-compare-link href="/listings?page={{ page - 1 }}&q={{ query }}&location={{ location }}&min_price={{ min_price or '' }}&max_price={{ max_price or '' }}&min_bedrooms={{ min_bedrooms or '' }}&min_bathrooms={{ min_bathrooms or '' }}&property_type={{ property_type or '' }}">Prev</a>
+      {% else %}
+      <span class="btn btn-outline" aria-disabled="true">Prev</span>
+      {% endif %}
+      <span class="page-status" aria-current="page">
+        <strong>Page {{ page }} of {{ total_pages }}</strong>
+        <span>{{ total }} properties</span>
+      </span>
+      {% if page < total_pages %}
+      <a class="btn btn-outline" data-compare-link href="/listings?page={{ page + 1 }}&q={{ query }}&location={{ location }}&min_price={{ min_price or '' }}&max_price={{ max_price or '' }}&min_bedrooms={{ min_bedrooms or '' }}&min_bathrooms={{ min_bathrooms or '' }}&property_type={{ property_type or '' }}">Next</a>
+      {% else %}
+      <span class="btn btn-outline" aria-disabled="true">Next</span>
+      {% endif %}
+    </nav>
+    {% endif %}
+  </main>
+</div>
+
+<script>
+  document.getElementById('toggle-advanced').addEventListener('click', function() {
+    const adv = document.getElementById('advanced-filters');
+    const isHidden = adv.style.display === 'none';
+    adv.style.display = isHidden ? 'block' : 'none';
+    this.textContent = isHidden ? 'Basic' : 'Advanced';
+  });
+
+  if ("{{ min_price or property_type or min_bedrooms or min_bathrooms or furnished }}".trim()) {
+    document.getElementById('advanced-filters').style.display = 'block';
+    document.getElementById('toggle-advanced').textContent = 'Basic';
+  }
+
+  const compareCheckboxes = Array.from(document.querySelectorAll('[data-compare-checkbox="1"]'));
+  const compareCount = document.getElementById('compare-count');
+  const compareSubmit = document.getElementById('compare-submit');
+  const decisionLabLink = document.getElementById('decision-lab-link');
+  const compareHiddenFields = document.getElementById('compare-hidden-fields');
+  const initialCompareValues = [{% for preselected_id in preselected_compare_ids %}"{{ preselected_id }}"{% if not loop.last %}, {% endif %}{% endfor %}];
+  const compareSelection = new Set(initialCompareValues);
+  const absorbCheckedCompareInputs = () => {
+    compareCheckboxes.forEach((input) => {
+      if (input.checked) {
+        compareSelection.add(input.value);
+      }
+    });
+  };
+
+  const syncCompareCount = () => {
+    compareCheckboxes.forEach((input) => {
+      if (compareSelection.has(input.value)) {
+        input.checked = true;
+      }
+    });
+    const combinedValues = [...compareSelection].sort((left, right) => Number(left) - Number(right));
+    const selectedCount = combinedValues.length;
+    compareCount.textContent = String(selectedCount);
+    compareSubmit.disabled = selectedCount < 2;
+    compareSubmit.classList.toggle('btn-primary', selectedCount >= 2);
+    compareSubmit.classList.toggle('btn-outline', selectedCount < 2);
+    if (compareHiddenFields) {
+      compareHiddenFields.innerHTML = '';
+      combinedValues.forEach((value) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'listing_ids';
+        input.value = value;
+        compareHiddenFields.appendChild(input);
+      });
+    }
+    decisionLabLink.setAttribute('href', `/listings/decision-lab?ids=${combinedValues.join(',')}`);
+    decisionLabLink.setAttribute('aria-disabled', selectedCount < 2 ? 'true' : 'false');
+    decisionLabLink.classList.toggle('btn-primary', selectedCount >= 2);
+    decisionLabLink.classList.toggle('btn-outline', selectedCount < 2);
+    document.querySelectorAll('[data-compare-link]').forEach((link) => {
+      const url = new URL(link.getAttribute('href'), window.location.origin);
+      if (combinedValues.length) {
+        url.searchParams.set('compare_selected', combinedValues.join(','));
+      } else {
+        url.searchParams.delete('compare_selected');
+      }
+      link.setAttribute('href', `${url.pathname}${url.search}`);
+    });
+  };
+
+  compareCheckboxes.forEach((input) => {
+    input.addEventListener('change', () => {
+      if (input.checked) {
+        compareSelection.add(input.value);
+      } else {
+        compareSelection.delete(input.value);
+      }
+      syncCompareCount();
+    });
+  });
+  window.addEventListener('pageshow', () => {
+    absorbCheckedCompareInputs();
+    syncCompareCount();
+  });
+  absorbCheckedCompareInputs();
+  document.querySelector('form[aria-label="Listing filters"]')?.addEventListener('submit', (event) => {
+    const form = event.currentTarget;
+    if (!(form instanceof HTMLFormElement)) {
+      return;
+    }
+    [...compareSelection].forEach((value) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'compare_selected';
+      input.value = value;
+      form.appendChild(input);
+    });
+  });
+  decisionLabLink.addEventListener('click', function (event) {
+    if (this.getAttribute('aria-disabled') === 'true') {
+      event.preventDefault();
+    }
+  });
+  syncCompareCount();
+</script>
+{% endblock %}

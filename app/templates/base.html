@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="{% block meta_description %}HomeFinder helps you discover and manage quality property listings quickly and securely.{% endblock %}"
+    />
+    <title>{% block title %}HomeFinder | Premium Property Discovery{% endblock %}</title>
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta property="og:title" content="HomeFinder - Find Your Next Space" />
+    <meta property="og:description" content="Discover and manage quality property listings quickly and securely with our premium discovery platform." />
+    <meta property="og:image" content="/static/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="HomeFinder - Premium Real Estate" />
+    <meta property="twitter:description" content="Intelligent property search and market analytics at your fingertips." />
+
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <style>
+      :root {
+        --hf-footer-bg: #0f1b2d;
+        --hf-footer-text: #c8d4e6;
+      }
+
+      [data-theme="dark"] {
+        --hf-footer-bg: #08101d;
+        --hf-footer-text: #b6c8e1;
+      }
+
+      .page-shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .site-header.marketplace-header {
+        border-bottom-color: color-mix(in srgb, var(--line) 82%, transparent);
+      }
+
+      .header-inner.marketplace-header-inner {
+        width: min(1180px, calc(100% - 0.5rem));
+      }
+
+      .site-nav.marketplace-nav {
+        gap: 0.6rem;
+      }
+
+      .site-nav.marketplace-nav a {
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-weight: 650;
+      }
+
+      .site-nav.marketplace-nav a[aria-current="page"] {
+        color: var(--text-primary);
+      }
+
+      .container.page-main {
+        width: min(1180px, 100% - 2rem);
+        margin: 1.6rem auto 2.5rem;
+        padding: 0;
+        flex: 1;
+      }
+
+      .site-footer.marketplace-footer {
+        margin-top: auto;
+        background: var(--hf-footer-bg);
+        color: var(--hf-footer-text);
+      }
+
+      .footer-inner {
+        width: min(1180px, 100% - 2rem);
+        margin: 0 auto;
+        padding: 2rem 0 1.1rem;
+        display: grid;
+        gap: 1.25rem;
+        grid-template-columns: 2fr 1fr 1fr;
+      }
+
+      .footer-column h2 {
+        margin: 0 0 0.6rem;
+        color: #ffffff;
+        font-size: 1rem;
+      }
+
+      .footer-column p {
+        margin: 0;
+        color: var(--hf-footer-text);
+      }
+
+      .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      .footer-links a {
+        text-decoration: none;
+        color: var(--hf-footer-text);
+      }
+
+      .footer-links a:hover {
+        color: #ffffff;
+      }
+
+      .footer-bottom {
+        width: min(1180px, 100% - 2rem);
+        margin: 0 auto;
+        padding: 0 0 1.25rem;
+        border-top: 1px solid rgba(175, 191, 215, 0.2);
+        color: #9cb1d1;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 900px) {
+        .site-nav.marketplace-nav {
+          top: calc(100% + 0.45rem);
+          left: auto;
+          right: 0.8rem;
+          width: min(320px, calc(100vw - 1.6rem));
+          border: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+          border-radius: 12px;
+          border-bottom-width: 1px;
+          box-shadow: var(--shadow-md);
+          padding: 0.55rem;
+        }
+
+        .footer-inner {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .container.page-main {
+          width: min(1180px, 100% - 1.2rem);
+          margin: 1.2rem auto 2rem;
+        }
+
+      }
+    </style>
+    {% if request.app.state.app_env == "production" and
+    request.app.state.use_minified_assets %}
+    <link rel="stylesheet" href="/static/styles.min.css?v=ui-polish-7" />
+    {% else %}
+    <link rel="stylesheet" href="/static/styles.css?v=ui-polish-7" />
+    {% endif %}
+  </head>
+  <body class="is-ready">
+    {% set current_path = request.url.path %}
+    <div id="nprogress"><div class="bar" role="progressbar" aria-label="Page loading progress"></div></div>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="page-shell">
+      <header class="site-header marketplace-header" data-header>
+        <div class="header-inner marketplace-header-inner">
+          <a href="/" class="brand">
+            <img src="/static/logo.jpg" alt="HomeFinder" class="brand-mark" width="36" height="36" />
+            <span class="brand-text">HomeFinder</span>
+          </a>
+          <button
+            class="menu-toggle"
+            type="button"
+            data-menu-toggle
+            aria-label="Toggle main navigation menu"
+          >
+            Menu
+          </button>
+          <nav
+            class="site-nav marketplace-nav"
+            data-menu
+            aria-label="Primary navigation"
+          >
+            <ul class="nav-list">
+              <li><a href="/" {% if current_path == '/' %}aria-current="page"{% endif %}>Home</a></li>
+              <li><a href="/listings" {% if current_path.startswith('/listings') and current_path != '/listings/new' %}aria-current="page"{% endif %}>Listings</a></li>
+              {% if request.session.get("user_id") %}
+              <li><a href="/dashboard" {% if current_path.startswith('/dashboard') %}aria-current="page"{% endif %}>Dashboard</a></li>
+              <li><a href="/messages/my" {% if current_path.startswith('/messages') %}aria-current="page"{% endif %}>Messages</a></li>
+              <li><a href="/account" {% if current_path.startswith('/account') or current_path.startswith('/change-password') %}aria-current="page"{% endif %}>Account</a></li>
+              {% if request.session.get("user_role") == "admin" %}
+              <li><a href="/admin" {% if current_path.startswith('/admin') %}aria-current="page"{% endif %}>Admin</a></li>
+              {% endif %}
+              <li><a href="/listings/new" class="cta-link">Add Listing</a></li>
+              {% else %}
+              <li><a href="/login" {% if current_path.startswith('/login') %}aria-current="page"{% endif %}>Login</a></li>
+              <li><a href="/users/register" class="cta-link">Get Started</a></li>
+              {% endif %}
+            </ul>
+            <button
+              type="button"
+              class="theme-toggle"
+              data-theme-toggle
+              aria-label="Switch color theme"
+              title="Switch color theme"
+            >
+              <span class="theme-track" aria-hidden="true">
+                <span class="theme-thumb"></span>
+              </span>
+              <span class="theme-label" data-theme-label>Dark mode</span>
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <main id="main-content" class="container page-main" tabindex="-1">
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="site-footer marketplace-footer">
+        <div class="footer-inner">
+          <section class="footer-column" aria-labelledby="footer-brand">
+            <h2 id="footer-brand">HomeFinder</h2>
+            <p>
+              A modern marketplace for buyers, renters, and agents who need
+              fast discovery and dependable property data.
+            </p>
+          </section>
+
+          <nav class="footer-column" aria-labelledby="footer-explore">
+            <h2 id="footer-explore">Explore</h2>
+            <ul class="footer-links">
+              <li><a href="/">Home</a></li>
+              <li><a href="/listings">Listings</a></li>
+              {% if request.session.get("user_id") %}
+              <li><a href="/listings/new">Add Listing</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+
+          <nav class="footer-column" aria-labelledby="footer-account">
+            <h2 id="footer-account">Account</h2>
+            <ul class="footer-links">
+              {% if request.session.get("user_id") %}
+              <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="/messages/my">My Messages</a></li>
+              {% if request.session.get("user_role") in ["property_owner", "admin"] %}
+              <li><a href="/messages/inbox">Owner Inbox</a></li>
+              {% endif %}
+              <li><a href="/account">Account Settings</a></li>
+              {% if request.session.get("user_role") == "admin" %}
+              <li><a href="/admin">Admin Panel</a></li>
+              {% endif %}
+              {% else %}
+              <li><a href="/login">Login</a></li>
+              <li><a href="/users/register">Create Account</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        <div class="footer-bottom">
+          HomeFinder <span id="year"></span> - Professional property discovery
+          platform.
+        </div>
+      </footer>
+    </div>
+
+    <div
+      class="toast-stack"
+      id="toast-stack"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+    <script src="/static/ux-metrics.js?v=1" defer></script>
+    <script src="/static/app.js?v=ui-polish-7" defer></script>
+  </body>
+</html>

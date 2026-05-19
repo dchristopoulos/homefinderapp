@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+{% block title %}Home - HomeFinder{% endblock %}
+{% block meta_description %}Browse premium property listings and discover your next home with curated details and secure account tools.{% endblock %}
+
+{% block content %}
+<style>
+  .portal-home {
+    display: grid;
+    gap: 4.5rem;
+  }
+
+  .portal-hero {
+    position: relative;
+    padding: clamp(2rem, 5vw, 4rem);
+    border-radius: 1.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background:
+      linear-gradient(122deg, rgba(8, 32, 63, 0.92) 15%, rgba(17, 85, 132, 0.78) 58%, rgba(214, 122, 58, 0.58) 100%),
+      url("https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1920&q=80") center/cover no-repeat;
+    color: #f8fbff;
+    box-shadow: 0 24px 60px -26px rgba(3, 7, 18, 0.7);
+  }
+
+  .portal-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.25) 0%, transparent 42%);
+    pointer-events: none;
+  }
+
+  .hero-layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .hero-kicker {
+    display: inline-flex;
+    width: fit-content;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .hero-title {
+    margin: 0;
+    max-width: 19ch;
+    line-height: 1.08;
+    font-size: clamp(2rem, 5vw, 4rem);
+    color: #f8fbff;
+  }
+
+  .hero-description {
+    margin: 0;
+    max-width: 58ch;
+    color: rgba(240, 248, 255, 0.9);
+    font-size: 1.05rem;
+  }
+
+  .hero-search {
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.85rem;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: rgba(5, 18, 38, 0.56);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .hero-search input,
+  .hero-search select {
+    width: 100%;
+    min-height: 3rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.75rem 0.85rem;
+    background: rgba(250, 252, 255, 0.95);
+    color: #0b2238;
+    font-size: 0.98rem;
+    outline: none;
+  }
+
+  .hero-search input:focus,
+  .hero-search select:focus {
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+  }
+
+  .hero-search button {
+    min-height: 3rem;
+    border-radius: 0.75rem;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ffa759 0%, #f57f17 100%);
+    color: #102033;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 12px 24px -14px rgba(245, 127, 23, 0.85);
+  }
+
+  .hero-search button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px -14px rgba(245, 127, 23, 1);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 0.4rem;
+  }
+
+  .hero-actions .btn {
+    border-radius: 999px;
+    padding-inline: 1rem;
+  }
+
+  .hero-actions .btn-primary {
+    animation: ctaPulse 2.6s ease-in-out infinite;
+  }
+
+  .trust-strip {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .trust-item {
+    padding: 1.1rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--line, #d7e0ea);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.84), rgba(247, 251, 255, 0.92));
+  }
+
+  .trust-item strong {
+    font-size: 1.35rem;
+    line-height: 1;
+    color: #0d3559;
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  .trust-item span {
+    font-size: 0.9rem;
+    color: var(--text-muted, #5f7489);
+  }
+
+  .featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.4rem;
+    margin-top: 1.4rem;
+  }
+
+  .listing-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 1.1rem;
+    border: 1px solid var(--line, #d7e0ea);
+    background: var(--surface, #ffffff);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .listing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -24px rgba(6, 18, 40, 0.45);
+  }
+
+  .listing-media {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+    background: #dbe6f0;
+  }
+
+  .listing-media img,
+  .listing-fallback {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .listing-fallback {
+    display: grid;
+    place-items: center;
+    background: linear-gradient(145deg, #0f4f8e, #143053);
+    color: #e6f2ff;
+  }
+
+  .listing-badge {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.85rem;
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(8, 32, 63, 0.85);
+    color: #f6f9ff;
+  }
+
+  .listing-content {
+    display: grid;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .listing-price {
+    margin: 0;
+    font-size: 1.35rem;
+    color: #0f5b9f;
+    font-weight: 800;
+  }
+
+  .listing-title {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.25;
+  }
+
+  .listing-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .listing-location {
+    margin: 0;
+    color: var(--text-muted, #5f7489);
+    font-size: 0.94rem;
+  }
+
+  .listing-meta {
+    display: flex;
+    gap: 0.8rem;
+    color: var(--text-muted, #5f7489);
+    font-size: 0.85rem;
+  }
+
+  .listing-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
+    padding: 0.25rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(23, 93, 156, 0.08);
+  }
+
+  .listing-cta {
+    margin-top: 0.25rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .path-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .path-card {
+    padding: 1.2rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--line, #d7e0ea);
+    background: linear-gradient(145deg, rgba(8, 32, 63, 0.05), rgba(255, 255, 255, 0.85));
+  }
+
+  .path-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.05rem;
+  }
+
+  .path-card p {
+    margin: 0 0 1rem 0;
+    color: var(--text-muted, #5f7489);
+    font-size: 0.92rem;
+  }
+
+  @keyframes ctaPulse {
+    0% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.28); }
+    70% { box-shadow: 0 0 0 12px rgba(29, 78, 216, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0); }
+  }
+
+  @media (max-width: 980px) {
+    .hero-search {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .trust-strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .portal-home {
+      gap: 3rem;
+    }
+
+    .hero-search {
+      grid-template-columns: 1fr;
+    }
+
+    .trust-strip {
+      grid-template-columns: 1fr;
+    }
+
+  }
+
+  [data-theme="dark"] .trust-item,
+  [data-theme="dark"] .path-card,
+  [data-theme="dark"] .listing-card {
+    border-color: rgba(148, 170, 197, 0.3);
+    background: rgba(21, 33, 50, 0.92);
+  }
+
+  [data-theme="dark"] .listing-price {
+    color: #7cc4ff;
+  }
+
+  [data-theme="dark"] .hero-search input,
+  [data-theme="dark"] .hero-search select {
+    background: rgba(11, 28, 49, 0.94);
+    color: #f0f6ff;
+    border-color: rgba(168, 192, 222, 0.35);
+  }
+
+  [data-theme="dark"] .trust-item strong {
+    color: #cde7ff;
+  }
+</style>
+
+<div class="portal-home">
+  <section class="portal-hero" data-reveal>
+    <div class="hero-layout">
+      <span class="hero-kicker">Top-rated listing portal</span>
+      <h1 class="hero-title">Find the right home faster with market-grade search</h1>
+      <p class="hero-description">
+        Compare neighborhoods, price ranges, and property types from one streamlined dashboard used by serious buyers and renters.
+      </p>
+
+      <form class="hero-search" action="/listings" method="GET">
+        <input type="text" name="q" placeholder="City, neighborhood, ZIP, or address" aria-label="Search location" />
+        <select name="property_type" aria-label="Property type">
+          <option value="">Any Type</option>
+          <option value="apartment">Apartment</option>
+          <option value="house">House</option>
+          <option value="villa">Villa</option>
+          <option value="studio">Studio</option>
+        </select>
+        <input type="number" name="max_price" min="0" placeholder="Max price ($)" aria-label="Maximum price" />
+        <button type="submit">Search</button>
+      </form>
+
+      <div class="hero-actions">
+        <a href="/listings" class="btn btn-primary">Browse All Listings</a>
+        <a href="/listings?property_type=house" class="btn btn-outline">Houses in Demand</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="trust-strip" data-reveal>
+    <article class="trust-item">
+      <strong>12k+</strong>
+      <span>Monthly buyer leads</span>
+    </article>
+    <article class="trust-item">
+      <strong>98%</strong>
+      <span>Verified listing accuracy</span>
+    </article>
+    <article class="trust-item">
+      <strong>350+</strong>
+      <span>New properties every week</span>
+    </article>
+    <article class="trust-item">
+      <strong>24h</strong>
+      <span>Average response time</span>
+    </article>
+  </section>
+
+  <section class="surface" data-reveal>
+    <div class="section-head">
+      <div>
+        <h2 style="font-size: clamp(1.7rem, 3vw, 2.35rem); margin-bottom: 0.4rem;">Featured Listings</h2>
+        <p class="subtle">Handpicked properties trending with HomeFinder clients right now.</p>
+      </div>
+      <a href="/listings" class="btn btn-outline">View Full Inventory</a>
+    </div>
+
+    <div class="featured-grid" data-stagger>
+      {% for listing in listings[:3] %}
+      <article class="listing-card">
+        <div class="listing-media">
+          <span class="listing-badge">Featured</span>
+          {% if listing.image_url %}
+          <img src="{{ listing_image_url(listing.image_url) }}" alt="{{ listing.title }}" loading="lazy" onerror="this.onerror=null;this.src='/static/listing-placeholder.svg';" />
+          {% else %}
+          <div class="listing-fallback">
+            <svg width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 10.5l9-7 9 7v10a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 20.5v-10z"></path><path d="M9.5 22v-7h5v7"></path></svg>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="listing-content">
+          <p class="listing-price">${{ "{:,}".format(listing.price) }}</p>
+          <h3 class="listing-title"><a href="/listings/{{ listing.id }}">{{ listing.title }}</a></h3>
+          <p class="listing-location">{{ listing.location }}</p>
+          <div class="listing-meta">
+            <span>{{ listing.bedrooms }} Beds</span>
+            <span>{{ listing.bathrooms }} Baths</span>
+          </div>
+          <div class="listing-cta">
+            <a href="/listings/{{ listing.id }}" class="btn btn-soft btn-sm">View Details</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="surface" data-reveal>
+    <div class="section-head">
+      <div>
+        <h2 style="font-size: clamp(1.6rem, 3vw, 2.1rem); margin-bottom: 0.4rem;">Explore By Priority</h2>
+        <p class="subtle">Quick paths based on how most clients narrow their search.</p>
+      </div>
+      <a href="/listings" class="btn btn-primary">Start Exploring</a>
+    </div>
+    <div class="path-grid" data-stagger>
+      <article class="path-card">
+        <h3>Move-in Ready</h3>
+        <p>Well-maintained homes suitable for immediate occupancy.</p>
+        <a href="/listings?property_type=house" class="btn btn-outline btn-sm">Browse Houses</a>
+      </article>
+      <article class="path-card">
+        <h3>Urban Apartments</h3>
+        <p>Compact and premium spaces in high-demand city districts.</p>
+        <a href="/listings?property_type=apartment" class="btn btn-outline btn-sm">Browse Apartments</a>
+      </article>
+      <article class="path-card">
+        <h3>Luxury Villas</h3>
+        <p>High-end properties with private outdoor amenities.</p>
+        <a href="/listings?property_type=villa" class="btn btn-outline btn-sm">Browse Villas</a>
+      </article>
+      <article class="path-card">
+        <h3>Budget Smart</h3>
+        <p>Focused options for value-first buyers and renters.</p>
+        <a href="/listings?max_price=250000" class="btn btn-outline btn-sm">Browse Value Picks</a>
+      </article>
+    </div>
+  </section>
+</div>
+{% endblock %}

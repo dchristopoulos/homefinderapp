@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: homefinder-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-homefinder}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-homefinder_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-homefinder}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - homefinder-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-homefinder} -d ${POSTGRES_DB:-homefinder}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      target: runtime
+    container_name: homefinder-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${HOMEFINDER_HOST_PORT:-8001}:8000"
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-homefinder}:${POSTGRES_PASSWORD:-homefinder_pass}@db:5432/${POSTGRES_DB:-homefinder}}
+      SESSION_SECRET: ${SESSION_SECRET}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+    volumes:
+      - uploads:/app/app/static/uploads
+      - logs:/app/logs
+    networks:
+      - homefinder-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  homefinder-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  uploads:
+  logs:
