@@ -61,6 +61,9 @@ from app.web.routers import (
 from app.web.routers import (
     messages as web_messages,
 )
+from app.web.routers import (
+    supervisor as web_supervisor,
+)
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 logger = logging.getLogger("homefinder.startup")
@@ -250,6 +253,7 @@ app.include_router(web_base.router)
 app.include_router(web_auth.router)
 app.include_router(web_account.router)
 app.include_router(web_dashboard.router)
+app.include_router(web_supervisor.router)
 app.include_router(web_admin.router)
 app.include_router(web_listings.router)
 app.include_router(web_messages.router)

@@ -183,6 +183,9 @@
               <li><a href="/listings" {% if current_path.startswith('/listings') and current_path != '/listings/new' %}aria-current="page"{% endif %}>Listings</a></li>
               {% if request.session.get("user_id") %}
               <li><a href="/dashboard" {% if current_path.startswith('/dashboard') %}aria-current="page"{% endif %}>Dashboard</a></li>
+              {% if nav_role in ["service_supervisor", "admin"] %}
+              <li><a href="/supervisor" {% if current_path.startswith('/supervisor') %}aria-current="page"{% endif %}>Supervisor</a></li>
+              {% endif %}
               <li><a href="/messages/my" {% if current_path.startswith('/messages') %}aria-current="page"{% endif %}>Messages</a></li>
               <li><a href="/account" {% if current_path.startswith('/account') or current_path.startswith('/change-password') %}aria-current="page"{% endif %}>Account</a></li>
               {% if nav_role == "admin" %}
@@ -240,6 +243,9 @@
             <ul class="footer-links">
               {% if request.session.get("user_id") %}
               <li><a href="/dashboard">Dashboard</a></li>
+              {% if nav_role in ["service_supervisor", "admin"] %}
+              <li><a href="/supervisor">Supervisor Dashboard</a></li>
+              {% endif %}
               <li><a href="/messages/my">My Messages</a></li>
               {% if nav_role in ["property_owner", "admin"] %}
               <li><a href="/messages/inbox">Owner Inbox</a></li>

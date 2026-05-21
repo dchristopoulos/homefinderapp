@@ -60,8 +60,48 @@ def _seed_default_admin() -> None:
         db.close()
 
 
+def _seed_demo_supervisor() -> None:
+    if not settings.seed_default_admin:
+        return
+    db = SessionLocal()
+    try:
+        existing = db.query(User).filter(User.username == "supervisor").first()
+        if existing is None:
+            existing = db.query(User).filter(User.email == "supervisor@homefinder.local").first()
+        if existing is not None:
+            existing.email = "supervisor@homefinder.local"
+            existing.role = "service_supervisor"
+            existing.email_verified = True
+            existing.must_reset_password = False
+            db.add(existing)
+            db.commit()
+            return
+        supervisor_user = User(
+            email="supervisor@homefinder.local",
+            username="supervisor",
+            password=hash_password("Supervisor123"),
+            role="service_supervisor",
+            email_verified=True,
+            must_reset_password=False,
+        )
+        db.add(supervisor_user)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        existing = db.query(User).filter(User.username == "supervisor").first()
+        if existing is not None:
+            existing.role = "service_supervisor"
+            existing.email_verified = True
+            existing.must_reset_password = False
+            db.add(existing)
+            db.commit()
+    finally:
+        db.close()
+
+
 def init_db() -> None:
     """Create all tables if they don't exist, then seed initial data."""
     Base.metadata.create_all(bind=engine)
     InquiryMessage.__table__.create(bind=engine, checkfirst=True)
     _seed_default_admin()
+    _seed_demo_supervisor()

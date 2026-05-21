@@ -53,6 +53,7 @@ Current demo users in the local database:
 | Username | Email | Role | Verified |
 | --- | --- | --- | --- |
 | admin | admin@homefinder.local | admin | yes |
+| supervisor | supervisor@homefinder.local | service_supervisor | yes |
 | testpropowner | testpropowner@homefinder.local | property_owner | yes |
 | testuser | testuser@homefinder.local | regular_user | yes |
 
@@ -61,6 +62,7 @@ Known demo login:
 | Identifier | Password | Role |
 | --- | --- | --- |
 | admin | admin | admin |
+| supervisor | Supervisor123 | service_supervisor |
 | testpropowner@homefinder.local | PropOwner123 | property_owner |
 | testuser@homefinder.local | TestUser123 | regular_user |
 

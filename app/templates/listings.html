@@ -76,6 +76,18 @@
     font-size: 0.92rem;
   }
 
+  .filter-group input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  .filter-group input[type="number"]::-webkit-inner-spin-button,
+  .filter-group input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   .field-help {
     margin: 0.35rem 0 0;
     color: var(--text-muted);
@@ -233,45 +245,59 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem;
-    min-height: 2.45rem;
-    border-radius: 12px;
-    border: 1px solid color-mix(in srgb, var(--line-strong) 82%, transparent);
+    gap: 0.55rem;
+    width: 100%;
+    min-height: 2.85rem;
+    border-radius: 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--line-strong) 78%, transparent);
     color: var(--text-primary);
-    background: color-mix(in srgb, var(--surface) 78%, transparent);
-    padding: 0.45rem 0.7rem;
+    background: color-mix(in srgb, var(--surface) 92%, var(--bg));
+    padding: 0.55rem 0.85rem;
     font-size: 0.86rem;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
-    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
 
   .compare-toggle:hover {
-    background: color-mix(in srgb, var(--brand) 8%, var(--surface));
-    border-color: color-mix(in srgb, var(--brand) 42%, var(--line-strong));
+    background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+    border-color: color-mix(in srgb, var(--brand) 48%, var(--line-strong));
+  }
+
+  .compare-toggle:focus-within {
+    box-shadow: var(--ring);
   }
 
   .compare-toggle input {
     appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 5px;
-    border: 1px solid rgba(15, 23, 42, 0.34);
-    background: #ffffff;
+    flex: 0 0 1.15rem;
+    width: 1.15rem;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    min-height: 1.15rem;
+    border-radius: 0.35rem;
+    border: 1.5px solid color-mix(in srgb, var(--line-strong) 88%, var(--text-muted));
+    background: color-mix(in srgb, var(--surface) 96%, #ffffff);
     margin: 0;
+    padding: 0;
     display: grid;
     place-items: center;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 72%, transparent);
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
   }
 
   .compare-toggle:has(input:checked) {
     color: #ffffff;
     background: linear-gradient(135deg, #2b72f6, #1450c7);
     border-color: color-mix(in srgb, var(--brand) 70%, black 8%);
+    box-shadow: 0 10px 22px rgba(20, 80, 199, 0.22);
   }
 
   .compare-toggle input:checked {
     background: #ffffff;
     border-color: rgba(255, 255, 255, 0.86);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
   }
 
   .compare-toggle input:checked::after {
@@ -281,6 +307,27 @@
     border-left: 2px solid #1450c7;
     border-bottom: 2px solid #1450c7;
     transform: rotate(-45deg) translateY(-1px);
+  }
+
+  [data-theme="dark"] .compare-toggle {
+    background: color-mix(in srgb, var(--surface-elevated) 72%, var(--bg));
+    border-color: color-mix(in srgb, var(--line-strong) 92%, transparent);
+  }
+
+  [data-theme="dark"] .compare-toggle:hover {
+    background: color-mix(in srgb, var(--brand) 14%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--brand) 58%, var(--line-strong));
+  }
+
+  [data-theme="dark"] .compare-toggle input {
+    background: color-mix(in srgb, var(--surface) 80%, #0f1622);
+    border-color: color-mix(in srgb, var(--line-strong) 82%, var(--text-muted));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  [data-theme="dark"] .compare-toggle input:checked {
+    background: #eef4ff;
+    border-color: rgba(238, 244, 255, 0.92);
   }
 
   .listing-body {
@@ -370,6 +417,28 @@
     min-width: 5.5rem;
     min-height: 2.45rem;
     border-radius: 12px;
+  }
+
+  .listing-save-action.btn-outline {
+    border-color: color-mix(in srgb, var(--line-strong) 92%, var(--text-muted));
+    background: color-mix(in srgb, var(--surface) 94%, var(--bg));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 52%, transparent);
+  }
+
+  .listing-save-action.btn-outline:hover {
+    border-color: color-mix(in srgb, var(--brand) 56%, var(--line-strong));
+    background: color-mix(in srgb, var(--brand) 8%, var(--surface));
+  }
+
+  [data-theme="dark"] .listing-save-action.btn-outline {
+    border-color: color-mix(in srgb, var(--line-strong) 96%, var(--text-muted));
+    background: color-mix(in srgb, var(--surface-elevated) 72%, var(--bg));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  [data-theme="dark"] .listing-save-action.btn-outline:hover {
+    border-color: color-mix(in srgb, var(--brand) 62%, var(--line-strong));
+    background: color-mix(in srgb, var(--brand) 13%, var(--surface-elevated));
   }
 
   .listing-contact {

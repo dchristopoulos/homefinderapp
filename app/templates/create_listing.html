@@ -68,6 +68,25 @@
     border-radius: 0.65rem;
     background: var(--bg);
     padding: 0.62rem 0.7rem;
+    min-height: 2.9rem;
+    line-height: 1.2;
+    display: block;
+  }
+
+  .field input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+    height: 2.9rem;
+    min-height: 2.9rem;
+    box-sizing: border-box;
+    padding-right: 0.7rem;
+  }
+
+  .field input[type="number"]::-webkit-inner-spin-button,
+  .field input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   .field input:focus,

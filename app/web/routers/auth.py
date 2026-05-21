@@ -23,6 +23,7 @@ from app.core.exceptions import (
 )
 from app.db.session import get_db
 from app.schemas.user import UserCreate
+from app.services.authz_service import has_permission
 from app.services.email_service import EmailMessage, send_email
 from app.services.email_verification_service import send_verification_email
 from app.services.user_service import (
@@ -253,6 +254,8 @@ def login_submit(
     )
     if user.role == "admin":
         return RedirectResponse(url="/admin", status_code=303)
+    if has_permission(user.role, "view_reports", user.permission_grants, user.permission_revokes):
+        return RedirectResponse(url="/supervisor", status_code=303)
     if bool(getattr(user, "must_reset_password", False)):
         return RedirectResponse(url="/change-password", status_code=303)
     return RedirectResponse(url="/dashboard", status_code=303)
